@@ -1,9 +1,10 @@
 from PyQt5.QtGui import QPixmap
 import dataserver
 import urllib.request
+from PyQt5.QtGui import QPainter
 
 
-class BingoMap:
+class BingoMap(QPainter):
 
     def __init__(self, coordonnees, zoom):
         super().__init__()
@@ -30,4 +31,9 @@ class BingoMap:
         url = self.__server.get_image_url((self.__latitude, self.__longitude), self.__zoom)
         image = urllib.request.urlopen(url).read()
         self.__buffer.loadFromData(image)
-        return self.__buffer
+
+
+    def draw_map(self):
+        self.update_buffer()
+        self.drawPoint(10,10)
+

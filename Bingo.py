@@ -1,8 +1,7 @@
 import sys
 
-from PyQt5.QtWidgets import QLabel, QApplication, QWidget, QLineEdit, QSpinBox
-
-import bingo_map
+from PyQt5.QtWidgets import QGridLayout, QLabel, QApplication, QWidget, QLineEdit, QSpinBox
+from bingo_map import BingoMap
 
 
 class MainWindow(QWidget):
@@ -17,40 +16,63 @@ class MainWindow(QWidget):
         self.__cter_longitude = 2.294444  # longitude du centre de la carte
         self.__zoom = 15
 
-        # Création des zones de saisies de la latitude et de la longitude et du zoom
+        # Zone de saisie de la latitude
+        lbl_latitude = QLabel(self)
+        lbl_latitude.setText('Latitude :')
+        le_latitude = QLineEdit(self)
+        le_latitude.setText(str(self.__cter_latitude))
 
-        self.label_latitude = QLabel(self)
-        self.label_longitude = QLabel(self)
-        self.label_zoom = QLabel(self)
-        self.linedit_latitude = QLineEdit(self)
-        self.linedit_longitude = QLineEdit(self)
-        self.spinbox_zoom = QSpinBox(self)
-        self.spinbox_zoom.setValue(self.__zoom)
+        # Zone de saisie de la longitude
+        lbl_longitude = QLabel(self)
+        lbl_longitude.setText('Longitude :')
+        le_longitude = QLineEdit(self)
+        le_longitude.setText(str(self.__cter_longitude))
 
-        self.linedit_latitude.setText(str(self.__cter_latitude))
-        self.linedit_longitude.setText(str(self.__cter_longitude))
-        self.spinbox_zoom.setRange(1, 23)
-        self.label_latitude.setText('Latitude :')
-        self.label_longitude.setText('Longitude :')
-        self.label_zoom.setText('Zoom :')
+        # Saisie du zoom
+        lbl_zoom = QLabel(self)
+        lbl_zoom.setText('Zoom :')
+        sb_zoom = QSpinBox(self)
+        sb_zoom.setRange(1, 23)
+        sb_zoom.setValue(self.__zoom)
 
-        self.label_latitude.setGeometry(10, 10, 50, 20)
-        self.linedit_latitude.setGeometry(60, 10, 80, 20)
-        self.label_longitude.setGeometry(10, 40, 50, 20)
-        self.linedit_longitude.setGeometry(60, 40, 80, 20)
-        self.label_zoom.setGeometry(10, 70, 50, 20)
-        self.spinbox_zoom.setGeometry(60, 70, 40, 20)
 
-        # Zone de dessin de la carte:
-        self.label_map = QLabel(self)
-        self.label_map.setGeometry(150, 10, 256, 256)
-        self.buffer_map = bingo_map.BingoMap((self.__cter_latitude, self.__cter_longitude), self.__zoom)
-        self.label_map.setPixmap(self.buffer_map.update_buffer())
-        # TODO : Create a function to draw the map
 
-        self.setGeometry(300, 300, 500, 400)
+        # zone où sera dessinée la carte
+        lbl_map = QLabel(self)
+        lbl_map.setMinimumWidth(256)
+        lbl_map.setMinimumHeight(256)
+
+        # Création du layout
+        grid = QGridLayout()
+        grid.setSpacing(5)
+        grid.setColumnMinimumWidth(1, 80)
+        grid.setColumnStretch(1,0)
+        grid.setColumnMinimumWidth(2,256)
+        grid.setColumnStretch(2,100)
+
+        grid.addWidget(lbl_latitude,0,0)
+        grid.addWidget(le_latitude, 0, 1)
+        grid.addWidget(lbl_longitude,1,0)
+        grid.addWidget(le_longitude, 1, 1)
+        grid.addWidget(lbl_zoom,2,0)
+        grid.addWidget(sb_zoom, 2, 1)
+        grid.addWidget(lbl_map,0,2,10,5)
+
+        self.setLayout(grid)
+
+        self.map_zone = BingoMap((self.__cter_latitude, self.__cter_longitude), self.__zoom)
+        self.map_zone.begin(lbl_map)
+        self.map_zone.draw_map()
+        self.map_zone.end()
+
+        self.setGeometry(300, 300, 640, 480)
         self.setWindowTitle('Bingo')
         self.show()
+
+    def paintEvent(self, event):
+            self.map_zone.begin(self)
+            self.map_zone.draw_map()
+            self.map_zone.end()
 
 
 def main():
